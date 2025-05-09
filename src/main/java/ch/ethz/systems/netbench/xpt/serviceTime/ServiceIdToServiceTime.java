@@ -12,27 +12,33 @@ public class ServiceIdToServiceTime {
 
         // Times are in nanoseconds with finer gradation
         // Critical services (1ms–3ms)
-        serviceTime.put("RT", 1_000_000);   // 1ms
-        serviceTime.put("EW", 2_000_000);   // 2ms
-        serviceTime.put("RF", 3_000_000);   // 3ms
+        serviceTime.put("VoIP", 30_000);   
+        serviceTime.put("Game", 40_000);   
+        serviceTime.put("AR", 50_000);  
 
         // Interactive services (5ms–15ms)
-        serviceTime.put("MI", 5_000_000);   // 5ms
-        serviceTime.put("CS", 10_000_000);  // 10ms
-        serviceTime.put("GH", 15_000_000);  // 15ms
+        serviceTime.put("Web", 80_000);   
+        serviceTime.put("SSH", 100_000);  
 
-        // Media / Best-effort (20ms–50ms)
-        serviceTime.put("YT", 20_000_000);  // 20ms
-        serviceTime.put("SN", 30_000_000);  // 30ms
-        serviceTime.put("TV", 40_000_000);  // 40ms
-        serviceTime.put("QW", 50_000_000);  // 50ms
+        // Streaming Media
+        serviceTime.put("Audio", 150_000);  
+        serviceTime.put("Video", 200_000);  
 
-        // Background / Default (75ms–100ms)
-        serviceTime.put("YU", 75_000_000);  // 75ms
-        serviceTime.put("Default", 100_000_000); // 100ms
+        // Background > 500ms (e.g., software updates, backups)
+        serviceTime.put("Backup", 800_000);  
+        serviceTime.put("Update", 600_000);  
+
+        // Default background service
+        serviceTime.put("Default", 100_000);
     }
 
+    private long calculateInversePriority(long latency) {
+        // Invert the priority: smaller latency gets higher priority (smaller rank)
+        return 1_000_000L / latency; // Scale to ensure higher priority for smaller latency
+    }
+    
     public Integer getServiceTime(String serviceId) {
-        return serviceTime.getOrDefault(serviceId, serviceTime.get("Default"));
+        return (int) calculateInversePriority(serviceTime.getOrDefault(serviceId, 
+                                            serviceTime.get("Default")));
     }
 }

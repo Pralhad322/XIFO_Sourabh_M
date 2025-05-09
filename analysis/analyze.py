@@ -107,8 +107,8 @@ def analyze_flow_completion():
                         range_completed_duration[j].append(duration[i])
                         range_completed_throughput[j].append(total_size_bytes[i] * 8 / duration[i])
 
-                else:
-                        range_num_unfinished_flows[j] += 1
+                    else:
+                            range_num_unfinished_flows[j] += 1
 
         # Ranges statistics
         for j in range(0, len(range_name)):
@@ -143,7 +143,7 @@ def analyze_flow_completion():
         service_flow_size = defaultdict(list)
         service_durations = defaultdict(list)
         service_num_flows = defaultdict(int)
-
+        service_unfinished_flows = defaultdict(int)
         # Collect statistics per service
         for i in range(0, len(flow_ids)):
             sid = service_ids[i]
@@ -155,6 +155,8 @@ def analyze_flow_completion():
                 service_flow_size[sid] += total_size_bytes[i]
                 service_durations[sid] += duration[i]
                 service_num_flows[sid] += 1
+            else:
+                service_unfinished_flows[sid] += 1
 
         # New: Add service-specific statistics
         for sid in service_flow_size.keys():
@@ -163,6 +165,7 @@ def analyze_flow_completion():
             statistics[f'service_{sid}_median_fct_ns'] = np.median(service_durations[sid])
             statistics[f'service_{sid}_99th_fct_ns'] = np.percentile(service_durations[sid], 99)
             statistics[f'service_{sid}_99.9th_fct_ns'] = np.percentile(service_durations[sid], 99.9)
+            statistics[f'service_{sid}_unfinihsed'] = service_unfinished_flows[sid]
 
         # Print raw results
         print('Writing to result file flow_completion.statistics...')

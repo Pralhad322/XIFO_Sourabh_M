@@ -10,6 +10,7 @@ import ch.ethz.systems.netbench.xpt.serviceTime.ServiceIdToServiceTime;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
+
 public class XIFOQueue implements Queue {
 
     private final ArrayList<ArrayBlockingQueue> queueList;
@@ -46,7 +47,6 @@ public class XIFOQueue implements Queue {
         Integer Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
         boolean returnValue = false;
         int rank = (int) Math.floor(Flowrank / Servicerank);
-
         // Mapping based on queue bounds
         int currentQueueBound;
         for (int q=queueList.size()-1; q>=0; q--){
@@ -98,7 +98,10 @@ public class XIFOQueue implements Queue {
             if (p != null){
 
                 PriorityHeader header = (PriorityHeader) p;
-                int rank = (int)header.getPriority();
+                int Flowrank = (int)header.getPriority();
+                String serviceId = header.getServiceId();
+                Integer Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
+                int rank = (int) Math.floor(Flowrank / Servicerank);
 
                 // Log rank of packet enqueued and queue selected if enabled
                 if(SimulationLogger.hasRankMappingEnabled()){
@@ -117,7 +120,9 @@ public class XIFOQueue implements Queue {
                     for (int i = 0; i <= queueList.size() - 1; i++) {
                         Object[] currentQueue = queueList.get(i).toArray();
                         for (int j = 0; j < currentQueue.length; j++) {
-                            int r = (int) ((FullExtTcpPacket) currentQueue[j]).getPriority();
+                            int Flowrank1 = (int) ((FullExtTcpPacket) currentQueue[j]).getPriority();
+                            Integer Servicerank1 = serviceIdToServiceTime.getServiceTime(((FullExtTcpPacket) currentQueue[j]).getServiceId());
+                            int r = (int) Math.floor(Flowrank1/Servicerank1);
                             if (r < rank) {
                                 count_inversions++;
                             }

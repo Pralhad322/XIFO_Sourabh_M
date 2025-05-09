@@ -46,6 +46,8 @@ public class SimulationLogger {
     // To maintain packet Drop Rate
     private static Map<String, Integer> packetDropMap = new HashMap<>();
 
+    // To maintain queueu utilization
+    private static Map<Integer, Integer> queueUtilizationMap = new HashMap<>();
     // Print streams used
     private static PrintStream originalOutOutputStream;
     private static PrintStream originalErrOutputStream;

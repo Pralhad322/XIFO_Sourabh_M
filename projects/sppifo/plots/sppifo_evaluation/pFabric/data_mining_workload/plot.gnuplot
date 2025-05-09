@@ -69,8 +69,8 @@ set bars front
 set key top center horizontal samplen 1.5 spacing 0.8
 midnight = "#191970"
 
-# Update xtics to match the 12 services in your data
-set xtics ("CS" 0, "DF" 1, "EW" 2, "GH" 3, "MI" 4, "QW" 5, "RF" 6, "RT" 7, "SN" 8, "TV" 9, "YT" 10, "YU" 11)
+# Update xtics to match the 12 services in your data and rotate the labels
+set xtics rotate by -45 ("VoIP" 0, "Game" 1, "AR" 2, "Web" 3, "SSH" 4, "Audio" 5, "Video" 6, "Backup" 7, "Update" 8, "Default" 9)
 
 # Update xrange to include all 12 data points
 set xrange [-0.5:11.5]

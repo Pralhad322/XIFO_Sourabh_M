@@ -8,14 +8,18 @@ def analyze_inversions(distribution):
     inversionsFIFO = {}
     inversionsSPPIFO = {}
     inversionsGreedy = {}
+    inversionsXIFO = {}
     totalFIFO = 0
     totalSPPIFO = 0
     totalGreedy = 0
+    totalXIFO = 0
 
     for i in range(0,101):
         inversionsFIFO[i] = 0
         inversionsSPPIFO[i] = 0
         inversionsGreedy[i] = 0
+        inversionsXIFO[i] = 0
+        
 
     with open("temp/sppifo/sppifo_analysis/alternative_distributions/" + distribution + "/FIFO/inversions_tracking.csv.log") as file:
         reader = csv.reader(file)
@@ -44,12 +48,21 @@ def analyze_inversions(distribution):
                 inversionsGreedy[rank] = inversionsGreedy[rank] + 1
                 totalGreedy = totalGreedy + 1
 
+    with open("temp/sppifo/sppifo_analysis/alternative_distributions/" + distribution + "/XIFO/inversions_tracking.csv.log") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            port = int(row[0])
+            rank = int(row[1])
+            if port == 1:
+                inversionsXIFO[rank] = inversionsXIFO[rank] + 1
+                totalXIFO = totalXIFO + 1
+
     # Write results in file
     w = open("projects/sppifo/plots/sppifo_analysis/alternative_distributions/" + distribution + "/" + distribution + ".dat", 'w')
     axis = range(0,100)
-    w.write("#  FIFO    SPPIFO  Greedy\n")
+    w.write("#  FIFO    SPPIFO  Greedy XIFO\n")
     for line in range(0,len(axis)):
-        w.write("%s   %s   %s   %s\n" % (axis[line], inversionsFIFO[line], inversionsSPPIFO[line], inversionsGreedy[line]))
+        w.write("%s   %s   %s   %s    %s  \n" % (axis[line], inversionsFIFO[line], inversionsSPPIFO[line], inversionsGreedy[line], inversionsXIFO[line]))
 
 # Call analysis functions
 analyze_inversions('convex')
