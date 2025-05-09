@@ -43,6 +43,9 @@ public class SimulationLogger {
     // Statistic counters
     private static Map<String, Long> statisticCounters = new HashMap<>();
 
+    // To maintain packet Drop Rate
+    private static Map<String, Integer> packetDropMap = new HashMap<>();
+
     // Print streams used
     private static PrintStream originalOutOutputStream;
     private static PrintStream originalErrOutputStream;
@@ -268,6 +271,14 @@ public class SimulationLogger {
             }
             writerStatistics.close();
 
+            // Write Packet Drop information with each rank
+            BufferedWriter writerPacketDrop = openWriter("packetDropPerService.log");
+            for(Map.Entry<String, Integer> entry : packetDropMap.entrySet()){
+                String serivce = entry.getKey();
+                Integer packetDrop = entry.getValue();
+                writerPacketDrop.write("Rank " + serivce + " Number of packet Droped are: " + packetDrop + "\n");
+            }
+            writerPacketDrop.close();
             // Close *all* the running log files
             writerRunInfoFile.close();
             writerFlowCompletionCsvFile.close();
@@ -596,6 +607,10 @@ public class SimulationLogger {
 
     public static boolean hasRankMappingEnabled() {
         return rankMappingEnabled;
+    }
+
+    public static void logDropPacketRank(String service) {
+        packetDropMap.put(service, packetDropMap.getOrDefault(service, 0) + 1);
     }
 
     public static boolean hasQueueBoundTrackingEnabled() {

@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.ports.PIFO_WFQ;
 
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.tcpbase.PriorityHeader;
@@ -83,6 +84,7 @@ public class WFQPIFOQueue extends PriorityBlockingQueue implements Queue {
                 this.remove(packet);
                 return packet;
             }
+            // SimulationLogger.logDropPacketRank(rank);
             return null;
         } finally {
             this.reentrantLock.unlock();

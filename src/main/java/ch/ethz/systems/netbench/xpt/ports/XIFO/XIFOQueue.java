@@ -32,7 +32,6 @@ public class XIFOQueue implements Queue {
         this.ownId = ownNetworkDevice.getIdentifier();
         this.stepSize = stepSize;
     }
-    double alpha = 0.3;
     // Packet dropped and null returned if selected queue exceeds its size
     @Override
     public boolean offer(Object o) {
@@ -44,10 +43,9 @@ public class XIFOQueue implements Queue {
         
         // Get the serviceId of the flow
         String serviceId = header.getServiceId();
-        Double Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
+        Integer Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
         boolean returnValue = false;
-
-        int rank = (int) Math.floor((alpha * Math.log(Flowrank)) + ((1 - alpha) * Math.exp(-Servicerank)));
+        int rank = (int) Math.floor(Flowrank / Servicerank);
 
         // Mapping based on queue bounds
         int currentQueueBound;
@@ -85,6 +83,9 @@ public class XIFOQueue implements Queue {
                     break;
                 }
             }
+        }
+        if(!returnValue){
+            SimulationLogger.logDropPacketRank(serviceId);
         }
         return returnValue;
     }

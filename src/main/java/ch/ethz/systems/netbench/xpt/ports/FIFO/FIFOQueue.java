@@ -24,7 +24,7 @@ public class FIFOQueue<E> extends LinkedBlockingQueue<E> {
         // We just create the class to be able to measure inversions at dequeue for the FIFO queue
         if (p != null){
             int rank = (int)((FullExtTcpPacket)p).getPriority();
-
+           
 
             // Check whether there is an inversion: a packet with smaller rank in queue than the one polled
             if (SimulationLogger.hasInversionsTrackingEnabled()) {

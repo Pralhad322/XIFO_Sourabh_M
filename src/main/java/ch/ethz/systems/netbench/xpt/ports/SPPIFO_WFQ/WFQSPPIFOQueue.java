@@ -1,5 +1,6 @@
 package ch.ethz.systems.netbench.xpt.ports.SPPIFO_WFQ;
 
+import ch.ethz.systems.netbench.core.log.SimulationLogger;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.tcpbase.PriorityHeader;
@@ -106,6 +107,9 @@ public class WFQSPPIFOQueue implements Queue {
             System.out.println(e.getMessage());
         } finally {
             this.reentrantLock.unlock();
+            if(!returnValue){
+                // SimulationLogger.logDropPacketRank(rank);
+            }
             return returnValue;
         }
     }

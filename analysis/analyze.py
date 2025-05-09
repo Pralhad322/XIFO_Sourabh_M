@@ -147,18 +147,15 @@ def analyze_flow_completion():
         # Collect statistics per service
         for i in range(0, len(flow_ids)):
             sid = service_ids[i]
-            if sid not in service_flow_size:
-                service_flow_size[sid] = 0  
-            if sid not in service_durations:
-                service_durations[sid] = 0  
-            
-            service_flow_size[sid] += total_size_bytes[i]
-            service_durations[sid] += duration[i]
-            service_num_flows[sid] += 1
-        
-        print(service_durations)
-        print(service_flow_size)
-        print(service_num_flows)
+            if(completed[i]):
+                if sid not in service_flow_size:
+                    service_flow_size[sid] = 0  
+                if sid not in service_durations:
+                    service_durations[sid] = 0      
+                service_flow_size[sid] += total_size_bytes[i]
+                service_durations[sid] += duration[i]
+                service_num_flows[sid] += 1
+
         # New: Add service-specific statistics
         for sid in service_flow_size.keys():
             statistics[f'service_{sid}_num_flows'] = service_num_flows[sid]

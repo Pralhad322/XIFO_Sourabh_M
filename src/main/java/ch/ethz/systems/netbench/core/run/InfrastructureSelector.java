@@ -295,7 +295,7 @@ class InfrastructureSelector {
             case "buffertcp":
                 return new BufferTcpTransportLayerGenerator();
             
-                case "dctcp":
+            case "dctcp":
                 return new NewRenoDctcpTransportLayerGenerator();
 
             case "simple_tcp":

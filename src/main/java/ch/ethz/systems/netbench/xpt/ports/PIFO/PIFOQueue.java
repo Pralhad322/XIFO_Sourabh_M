@@ -55,7 +55,8 @@ public class PIFOQueue extends PriorityBlockingQueue implements Queue {
             Arrays.sort(contentPIFO);
             FullExtTcpPacket drop_packet = (FullExtTcpPacket) contentPIFO[this.size()-1];
             this.remove(drop_packet);
-
+            String serviceId = ((FullExtTcpPacket)packet).getServiceId();
+            SimulationLogger.logDropPacketRank(serviceId);
             /* Debug */
             message = message + "]\n";
             message = message + "Packet dropped: " + drop_packet.getPriority() + "(" + drop_packet.getEnqueueTime() + ")";

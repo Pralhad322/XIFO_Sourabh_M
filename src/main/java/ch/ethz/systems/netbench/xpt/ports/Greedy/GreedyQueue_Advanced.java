@@ -380,6 +380,9 @@ public class GreedyQueue_Advanced implements Queue {
         } finally {
             this.reentrantLock.unlock();
             // System.out.println("Packet with rank " + rank + "enqueued_flag" + returnValue);
+            if(!returnValue){
+                // SimulationLogger.logDropPacketRank(rank);
+            }
             return returnValue;
         }
     }
