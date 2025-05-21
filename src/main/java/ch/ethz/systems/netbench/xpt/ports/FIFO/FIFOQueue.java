@@ -38,7 +38,7 @@ public class FIFOQueue<E> extends LinkedBlockingQueue<E> {
                     }
                 }
                 if (count_inversions != 0) {
-                    SimulationLogger.logInversionsPerRank(this.ownId, rank, count_inversions);
+                    SimulationLogger.logInversionsPerService(((FullExtTcpPacket)p).getServiceId(), rank, count_inversions);
                 }
             }
         }

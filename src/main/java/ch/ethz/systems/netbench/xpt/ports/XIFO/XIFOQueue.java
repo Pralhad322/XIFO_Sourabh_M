@@ -5,26 +5,25 @@ import ch.ethz.systems.netbench.core.network.NetworkDevice;
 import ch.ethz.systems.netbench.core.network.Packet;
 import ch.ethz.systems.netbench.xpt.tcpbase.FullExtTcpPacket;
 import ch.ethz.systems.netbench.xpt.tcpbase.PriorityHeader;
-import ch.ethz.systems.netbench.xpt.serviceTime.ServiceIdToServiceTime;
+import ch.ethz.systems.netbench.xpt.ports.XIFO.KLLSketch;
 
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 
 
 public class XIFOQueue implements Queue {
-
+    
     private final ArrayList<ArrayBlockingQueue> queueList;
     private final Map queueBounds;
     private int ownId;
     private String stepSize;
-    ServiceIdToServiceTime serviceIdToServiceTime;
+    private final SampleBufferKLL scheduler;
     public XIFOQueue(long numQueues, long perQueueCapacity, NetworkDevice ownNetworkDevice, String stepSize){
         this.queueList = new ArrayList((int)numQueues);
         this.queueBounds = new HashMap();
         
-
+        this.scheduler = new SampleBufferKLL(100, 20);
         ArrayBlockingQueue fifo;
-        serviceIdToServiceTime = new ServiceIdToServiceTime();
         for (int i=0; i<(int)numQueues; i++){
             fifo = new ArrayBlockingQueue<Packet>((int)perQueueCapacity);
             queueList.add(fifo);
@@ -40,54 +39,14 @@ public class XIFOQueue implements Queue {
         // Extract rank from header
         Packet packet = (Packet) o;
         PriorityHeader header = (PriorityHeader) packet;
-        int Flowrank = (int)header.getPriority();
-        
-        // Get the serviceId of the flow
-        String serviceId = header.getServiceId();
-        Integer Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
-        boolean returnValue = false;
-        int rank = (int) Math.floor(Flowrank / Servicerank);
-        // Mapping based on queue bounds
-        int currentQueueBound;
-        for (int q=queueList.size()-1; q>=0; q--){
-            currentQueueBound = (int)queueBounds.get(q);
-            if ((currentQueueBound <= rank) || q==0) {
-                boolean result = queueList.get(q).offer(o);
-                if (!result){
-                    returnValue = false;
-                    break;
-                } else {
-
-                    // Per-packet queue bound adaptation
-                    queueBounds.put(q, rank);
-                    int cost = currentQueueBound - rank;
-                    if (cost > 0){
-                        for (int w=queueList.size()-1; w>q; w--){
-                            currentQueueBound = (int) queueBounds.get(w);
-
-                            // Update queue bounds
-                            if (this.stepSize.equals("cost")){
-                                queueBounds.put(w, currentQueueBound-cost);
-                            } else if (this.stepSize.equals("1")){
-                                queueBounds.put(w, currentQueueBound-1);
-                            } else if (this.stepSize.equals("rank")){
-                                queueBounds.put(w, currentQueueBound-rank);
-                            } else if (this.stepSize.equals("queueBound")){
-                                queueBounds.put(w, queueBounds.get(w-1));
-                            } else {
-                                System.out.println("ERROR: SP-PIFO step size not supported.");
-                            }
-                        }
-                    }
-                    returnValue = true;
-                    break;
-                }
-            }
+        int rank = (int)header.getPriority();
+        scheduler.insert(rank);
+        int queue = scheduler.getQueueIndex(rank);
+        boolean result = queueList.get(queue).offer(o);
+        if(!result){
+            return false;
         }
-        if(!returnValue){
-            SimulationLogger.logDropPacketRank(serviceId);
-        }
-        return returnValue;
+        return true;
     }
 
     @Override
@@ -98,10 +57,7 @@ public class XIFOQueue implements Queue {
             if (p != null){
 
                 PriorityHeader header = (PriorityHeader) p;
-                int Flowrank = (int)header.getPriority();
-                String serviceId = header.getServiceId();
-                Integer Servicerank = serviceIdToServiceTime.getServiceTime(serviceId);
-                int rank = (int) Math.floor(Flowrank / Servicerank);
+                int rank = (int)header.getPriority();
 
                 // Log rank of packet enqueued and queue selected if enabled
                 if(SimulationLogger.hasRankMappingEnabled()){
@@ -120,16 +76,14 @@ public class XIFOQueue implements Queue {
                     for (int i = 0; i <= queueList.size() - 1; i++) {
                         Object[] currentQueue = queueList.get(i).toArray();
                         for (int j = 0; j < currentQueue.length; j++) {
-                            int Flowrank1 = (int) ((FullExtTcpPacket) currentQueue[j]).getPriority();
-                            Integer Servicerank1 = serviceIdToServiceTime.getServiceTime(((FullExtTcpPacket) currentQueue[j]).getServiceId());
-                            int r = (int) Math.floor(Flowrank1/Servicerank1);
+                            int r = (int) ((FullExtTcpPacket) currentQueue[j]).getPriority();
                             if (r < rank) {
                                 count_inversions++;
                             }
                         }
                     }
                     if (count_inversions != 0) {
-                        SimulationLogger.logInversionsPerRank(this.ownId, rank, count_inversions);
+                        // SimulationLogger.logInversionsPerService(rank, count_inversions);
                     }
                 }
                 return p;

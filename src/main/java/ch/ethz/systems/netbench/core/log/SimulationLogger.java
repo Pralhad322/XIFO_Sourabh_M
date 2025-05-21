@@ -344,9 +344,9 @@ public class SimulationLogger {
         }
     }
 
-    public static void logInversionsPerRank(int id, int rank, long inversion) {
+    public static void logInversionsPerService(String serviceId, int rank, long inversion) {
         try {
-            writerInversionsTracking.write(id + "," + rank + "," + inversion + "\n");
+            writerInversionsTracking.write(serviceId + "," + rank + "," + inversion + "\n");
         } catch (IOException e) {
             throw new LogFailureException(e);
         }
